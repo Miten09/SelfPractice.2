@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect,useCallback} from "react";
 
 import MoviesList from "./components/MoviesList";
 import "./App.css";
@@ -6,30 +6,33 @@ import "./App.css";
 function App() {
   const [movies, setmovies] = useState([]);
   const [isLoading, setisLoading] = useState(false);
-  const [error,seterror]=useState(null)
+  const [error, seterror] = useState(null);
 
-  async function fetchMoviesHandler() {
+ 
+
+  const fetchMoviesHandler=useCallback(async()=> {
     setisLoading(true);
-    seterror(null)
+    seterror(null);
 
-    
-    try{
+    try {
       const response = await fetch("https://swapi.dev/api/films");
-      if(!response.ok){
-        throw new Error('something went wrong !!')
+      if (!response.ok) {
+        throw new Error("something went wrong !!");
       }
       const data = await response.json();
 
-   
       setmovies(data.results);
-    
+      setisLoading(false);
+    } catch (error) {
+      seterror(error.message);
     }
-   catch(error){
-     seterror(error.message)
-   }
-   setisLoading(false);
-  }
+    
+  },[])
 
+  useEffect(()=>{
+    fetchMoviesHandler()
+  },[fetchMoviesHandler])
+  
   return (
     <React.Fragment>
       s
@@ -38,8 +41,8 @@ function App() {
       </section>
       <section>
         {!isLoading && <MoviesList movies={movies} />}
-        {!isLoading && movies.length ===0 && !error && <p>Found No movies.</p>}
-        {isLoading && <p>Loading...</p>}  
+        {!isLoading && movies.length === 0 && !error && <p>Found No movies.</p>}
+        {isLoading && <p>Loading...</p>}
         {!isLoading && error && <p>{error}</p>}
       </section>
     </React.Fragment>
